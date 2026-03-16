@@ -1,0 +1,40 @@
+{
+  "name": "homelab-mcp",
+  "version": "0.1.0",
+  "description": "Homelab assistant connecting Proxmox infrastructure to AI agents via MCP and Telegram",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "homelab-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:mcp": "node dist/index.js --mcp",
+    "start:telegram": "node dist/index.js --telegram",
+    "dev": "tsx src/index.ts",
+    "dev:mcp": "tsx src/index.ts --mcp",
+    "dev:telegram": "tsx src/index.ts --telegram",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["mcp", "proxmox", "homelab", "telegram", "ai", "model-context-protocol"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "dotenv": "^16.4.7",
+    "grammy": "^1.35.0",
+    "openai": "^4.85.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
