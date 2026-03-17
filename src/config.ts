@@ -35,6 +35,13 @@ const configSchema = z.object({
       model: z.string().optional(),
     })
     .optional(),
+
+  // Dashboard (optional)
+  dashboard: z
+    .object({
+      port: z.coerce.number().default(3000),
+    })
+    .optional(),
 });
 
 export type Config = z.infer<typeof configSchema>;
@@ -56,6 +63,9 @@ function loadConfig(): Config {
       provider: process.env.AI_PROVIDER ?? "openai",
       apiKey: process.env.AI_API_KEY,
       model: process.env.AI_MODEL,
+    },
+    dashboard: {
+      port: process.env.DASHBOARD_PORT ?? "3000",
     },
   };
 

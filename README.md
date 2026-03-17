@@ -1,36 +1,37 @@
 # homelab-mcp
 
-A homelab assistant that connects your **Proxmox** infrastructure to **AI agents** via [MCP](https://modelcontextprotocol.io/) and to **Telegram** for phone-based management in plain English.
+A homelab assistant that connects your **Proxmox** infrastructure to **AI agents** via [MCP](https://modelcontextprotocol.io/), to **Telegram** for phone-based management in plain English, and provides a **real-time web dashboard** for visual monitoring.
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│  Claude Desktop  │     │   Telegram Bot   │     │   Codex CLI     │
-│  / Codex / Any   │     │  (your phone)    │     │  / Any MCP      │
-│  MCP Client      │     │                  │     │  Client         │
-└────────┬─────────┘     └────────┬─────────┘     └────────┬────────┘
-         │  MCP protocol          │  grammy                │
-         └────────────┐  ┌────────┘                ┌───────┘
-                      ▼  ▼                         ▼
-               ┌──────────────────────────┐
-               │     Core Action Layer    │
-               │   (src/core/actions.ts)  │
-               └────────────┬─────────────┘
-                            │
-                    ┌───────▼────────┐
-                    │  Proxmox REST  │
-                    │  API Client    │
-                    └───────┬────────┘
-                            │
-                    ┌───────▼────────┐
-                    │  Proxmox VE    │
-                    │  Cluster       │
-                    └────────────────┘
+┌─────────────────┐  ┌──────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│  Claude Desktop  │  │   Telegram Bot   │  │  Web Dashboard  │  │   Codex CLI     │
+│  / Codex / Any   │  │  (your phone)    │  │  (real-time UI) │  │  / Any MCP      │
+│  MCP Client      │  │                  │  │                 │  │  Client         │
+└────────┬─────────┘  └────────┬─────────┘  └────────┬────────┘  └────────┬────────┘
+         │  MCP protocol       │  grammy             │  HTTP/JSON         │
+         └──────────┐  ┌───────┘            ┌────────┘            ┌───────┘
+                    ▼  ▼                    ▼                     ▼
+               ┌─────────────────────────────────────────┐
+               │          Core Action Layer              │
+               │        (src/core/actions.ts)            │
+               └───────────────────┬─────────────────────┘
+                                   │
+                           ┌───────▼────────┐
+                           │  Proxmox REST  │
+                           │  API Client    │
+                           └───────┬────────┘
+                                   │
+                           ┌───────▼────────┐
+                           │  Proxmox VE    │
+                           │  Cluster       │
+                           └────────────────┘
 ```
 
-**One shared core, two frontends.** The same action layer powers both the MCP server (for AI agents) and the Telegram bot (for your phone). No logic duplication.
+**One shared core, three frontends.** The same action layer powers the MCP server (for AI agents), the Telegram bot (for your phone), and the web dashboard (for visual monitoring). No logic duplication.
 
 ## Features
 
+- **Web Dashboard** — Real-time cluster monitoring with CPU/memory/disk gauges, VM status cards, storage overview, and recent tasks — zero dependencies, auto-refreshes every 10s
 - **MCP Server** — 7 tools + 2 resources for AI agents to manage your homelab
 - **Telegram Bot** — Slash commands + inline keyboards for quick mobile management
 - **Natural Language** — Tell the bot what you want in plain English (powered by OpenAI or Anthropic)
@@ -53,7 +54,7 @@ A homelab assistant that connects your **Proxmox** infrastructure to **AI agents
 ### Install
 
 ```bash
-git clone https://github.com/yourusername/homelab-mcp.git
+git clone https://github.com/patelpa1639/homelab-mcp.git
 cd homelab-mcp
 npm install
 cp .env.example .env
@@ -105,6 +106,29 @@ PROXMOX_TOKEN_SECRET = "your-token-secret"
 ```bash
 npm run start:telegram
 ```
+
+### Web Dashboard
+
+The dashboard provides a real-time visual overview of your entire Proxmox cluster — nodes, VMs, containers, storage, and recent tasks — all in a single page that auto-refreshes every 10 seconds.
+
+```bash
+# Standalone
+npm run dev:dashboard
+
+# Or run alongside Telegram bot (default mode)
+npm run dev
+```
+
+Then open `http://localhost:3000` in your browser. Configure the port with `DASHBOARD_PORT` in `.env`.
+
+**What you get:**
+- Cluster-wide CPU, memory, storage, and guest count at a glance
+- Per-node ring gauges with uptime and core counts
+- VM/container cards with live CPU, memory, disk, and network metrics
+- Recent Proxmox tasks with status indicators
+- Storage pool usage breakdown
+- Fully responsive — works on mobile, tablet, and desktop
+- Zero external dependencies — no React, no bundler, just a single self-contained HTML page served from Node.js
 
 ### Run 24/7 as a Systemd Service
 
@@ -245,6 +269,7 @@ When AI is configured, type in plain English:
 | `AI_PROVIDER` | No | `openai` | `openai` or `anthropic` |
 | `AI_API_KEY` | No | — | API key for natural language routing |
 | `AI_MODEL` | No | auto | Model override for AI provider |
+| `DASHBOARD_PORT` | No | `3000` | Web dashboard port |
 
 ## Security Notes
 
@@ -257,11 +282,13 @@ When AI is configured, type in plain English:
 ## Development
 
 ```bash
-npm run dev          # Run Telegram bot with tsx (hot reload)
-npm run dev:mcp      # Run MCP server with tsx
-npm run lint         # Type check
-npm run build        # Compile TypeScript
-npm run clean        # Remove build artifacts
+npm run dev              # Run Telegram bot + Dashboard with tsx (hot reload)
+npm run dev:mcp          # Run MCP server with tsx
+npm run dev:telegram     # Run Telegram bot only
+npm run dev:dashboard    # Run Dashboard only
+npm run lint             # Type check
+npm run build            # Compile TypeScript
+npm run clean            # Remove build artifacts
 ```
 
 ## License
